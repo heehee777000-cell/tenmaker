@@ -5,17 +5,17 @@ const TenGame = (() => {
   // STATE MANAGEMENT
   // ----------------------------------------------------
   let state = {
-    user: null, // Firebase Auth user object
+    user: null,
     uid: 'local_player',
     nickname: '로그인',
-    gold: 150, // 초기 체험 골드
+    gold: 150,
     clearCount: 0,
-    bestBossTime: null, // 최단 시간 (초 단위)
+    bestBossTime: null,
     activeScreen: 'mainMenu',
-    currentTab: 'time' // 명예의 전당 기본 탭 ('time', 'gold', 'clear')
+    currentTab: 'time'
   };
 
-  let currentGame = null; // 미니게임 / 보스전 실행 객체
+  let currentGame = null;
   let gameInterval = null;
   let timerInterval = null;
   let firebaseModule = null;
@@ -233,8 +233,8 @@ const TenGame = (() => {
       desc: '25초 동안 격자판에서 상하좌우로 붙어있는 인접 블럭의 합이 10이면 파괴!',
       rules: [
         '상하좌우로 붙어있는 두 블럭 중 합이 10이 되는 조합을 선택하세요.',
-        '3번 블럭은 원형, 4번 블럭은 노란색! 숫자가 터지면 위 블럭이 떨어진니다.',
-        '💡 만들 수 있는 10 짝이 없으면 판이 자동으로 새로 섞입니다!'
+        '3번 블럭은 원형, 4번 블럭은 노란색! 숫자가 터지면 위 블럭이 떨어집니다.',
+        '💡 만들 수 있는 10 짝이 없으면 팝업 안내 후 판이 자동으로 새로 섞입니다!'
       ],
       action: () => startMiniGame('block')
     },
@@ -379,7 +379,7 @@ const TenGame = (() => {
   }
 
   // ----------------------------------------------------
-  // MINI GAME 2: 10 블럭 크러시 (BLOCK CRASH 10) - AUTO SHUFFLE & VALID MOVE CHECK
+  // MINI GAME 2: 10 블럭 크러시 (BLOCK CRASH 10) - AUTO SHUFFLE & POPUP NOTICE
   // ----------------------------------------------------
   function initBlockGame() {
     const playArea = document.getElementById('playArea');
@@ -401,7 +401,6 @@ const TenGame = (() => {
     let earnedGold = 0;
     let selectedBlock = null;
 
-    // 인접 10 조합이 존재하는지 검사
     function hasValidMove() {
       const dr = [-1, 1, 0, 0];
       const dc = [0, 0, -1, 1];
@@ -417,13 +416,13 @@ const TenGame = (() => {
             if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
               const val2 = gridData[nr][nc];
               if (val2 > 0 && val1 + val2 === 10) {
-                return true; // 10 조합 존재!
+                return true;
               }
             }
           }
         }
       }
-      return false; // 조합 없음 (막힌 상태)
+      return false;
     }
 
     function createBoard() {
@@ -437,13 +436,24 @@ const TenGame = (() => {
             gridData[r][c] = Math.floor(Math.random() * 9) + 1;
           }
         }
-      } while (!hasValidMove()); // 최소 1개 이상 10 조합이 나올 때까지 생성
+      } while (!hasValidMove());
 
       let allCoords = [];
       for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) allCoords.push(`${r}-${c}`);
       }
       renderBoard(allCoords);
+    }
+
+    // 🔀 셔플 팝업 띄우고 판 섞는 함수
+    function triggerShuffleNoticeAndExecute(isAuto = false) {
+      const modal = document.getElementById('shuffleNoticeModal');
+      if (modal) modal.classList.add('active');
+
+      setTimeout(() => {
+        if (modal) modal.classList.remove('active');
+        shuffleBoard();
+      }, 1100);
     }
 
     function shuffleBoard() {
@@ -557,11 +567,11 @@ const TenGame = (() => {
       }
       renderBoard(fallingCoords);
 
-      // ★ [막힘 자동 감지] 인접 10 조합이 없으면 자동 셔플! ★
+      // ★ [팝업 안내 후 자동 셔플 실행] ★
       if (!hasValidMove()) {
         setTimeout(() => {
-          shuffleBoard();
-        }, 400);
+          triggerShuffleNoticeAndExecute(true);
+        }, 300);
       }
     }
 

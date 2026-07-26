@@ -613,6 +613,37 @@ body {
   }
 }
 
+/* SHUFFLE NOTICE POPUP STYLES */
+.shuffle-modal-card {
+  max-width: 380px;
+  border: 2px solid var(--accent-gold);
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+}
+
+.shuffle-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  animation: rotateIcon 0.8s ease-in-out infinite;
+}
+
+@keyframes rotateIcon {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.2); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+.shuffle-modal-card h3 {
+  font-size: 1.25rem;
+  color: var(--accent-gold);
+  margin-bottom: 8px;
+}
+
+.shuffle-modal-card p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
 /* MATH RUSH STYLES */
 .math-rush-container {
   display: flex;
