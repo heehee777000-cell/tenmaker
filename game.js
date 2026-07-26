@@ -5,17 +5,17 @@ const TenGame = (() => {
   // STATE MANAGEMENT
   // ----------------------------------------------------
   let state = {
-    user: null,
+    user: null, // Firebase Auth user object
     uid: 'local_player',
     nickname: '로그인',
-    gold: 150,
+    gold: 150, // 초기 체험 골드
     clearCount: 0,
-    bestBossTime: null,
+    bestBossTime: null, // 최단 시간 (초 단위)
     activeScreen: 'mainMenu',
-    currentTab: 'time'
+    currentTab: 'time' // 명예의 전당 기본 탭 ('time', 'gold', 'clear')
   };
 
-  let currentGame = null;
+  let currentGame = null; // 미니게임 / 보스전 실행 객체
   let gameInterval = null;
   let timerInterval = null;
   let firebaseModule = null;
@@ -52,43 +52,11 @@ const TenGame = (() => {
     }
   }
 
+  // ★ [수정] 더미 유저 데이터 전면 제거! 오직 실제 플레이 유저만 기록 ★
   const defaultRankings = {
-    time: [
-      { nickname: '수학신동', value: 4.82 },
-      { nickname: '스피드킹', value: 5.15 },
-      { nickname: '10마스터', value: 5.90 },
-      { nickname: '빛의연산자', value: 6.42 },
-      { nickname: '블럭파괴자', value: 7.10 },
-      { nickname: '짝짓기달인', value: 8.35 },
-      { nickname: '알파고', value: 9.20 },
-      { nickname: '텐메이커77', value: 10.45 },
-      { nickname: '초보연금술사', value: 12.10 },
-      { nickname: '기억의신', value: 14.80 }
-    ],
-    gold: [
-      { nickname: '황금손', value: 3500 },
-      { nickname: '10마스터', value: 2800 },
-      { nickname: '부자왕', value: 2100 },
-      { nickname: '수학신동', value: 1950 },
-      { nickname: '골드헌터', value: 1500 },
-      { nickname: '블럭파괴자', value: 1200 },
-      { nickname: '알파고', value: 980 },
-      { nickname: '빛의연산자', value: 850 },
-      { nickname: '짝짓기달인', value: 600 },
-      { nickname: '스피드킹', value: 450 }
-    ],
-    clear: [
-      { nickname: '노력파', value: 84 },
-      { nickname: '10마스터', value: 62 },
-      { nickname: '황금손', value: 51 },
-      { nickname: '블럭파괴자', value: 43 },
-      { nickname: '수학신동', value: 39 },
-      { nickname: '짝짓기달인', value: 31 },
-      { nickname: '스피드킹', value: 25 },
-      { nickname: '빛의연산자', value: 20 },
-      { nickname: '골드헌터', value: 17 },
-      { nickname: '알파고', value: 14 }
-    ]
+    time: [],
+    gold: [],
+    clear: []
   };
 
   function loadData() {
@@ -103,10 +71,8 @@ const TenGame = (() => {
       } catch (e) { console.error(e); }
     }
 
-    const savedRankings = localStorage.getItem('tenmaker_rankings');
-    if (!savedRankings) {
-      localStorage.setItem('tenmaker_rankings', JSON.stringify(defaultRankings));
-    }
+    // 더미 랭킹 삭제 처리
+    localStorage.removeItem('tenmaker_rankings');
 
     updateHeaderUI();
   }
@@ -126,12 +92,12 @@ const TenGame = (() => {
   }
 
   function getRankings() {
-    const data = localStorage.getItem('tenmaker_rankings');
+    const data = localStorage.getItem('tenmaker_rankings_real');
     return data ? JSON.parse(data) : defaultRankings;
   }
 
   function saveRankings(rankingsObj) {
-    localStorage.setItem('tenmaker_rankings', JSON.stringify(rankingsObj));
+    localStorage.setItem('tenmaker_rankings_real', JSON.stringify(rankingsObj));
   }
 
   function updateHeaderUI() {
@@ -379,7 +345,7 @@ const TenGame = (() => {
   }
 
   // ----------------------------------------------------
-  // MINI GAME 2: 10 블럭 크러시 (BLOCK CRASH 10) - AUTO SHUFFLE & POPUP NOTICE
+  // MINI GAME 2: 10 블럭 크러시 (BLOCK CRASH 10)
   // ----------------------------------------------------
   function initBlockGame() {
     const playArea = document.getElementById('playArea');
@@ -445,7 +411,6 @@ const TenGame = (() => {
       renderBoard(allCoords);
     }
 
-    // 🔀 셔플 팝업 띄우고 판 섞는 함수
     function triggerShuffleNoticeAndExecute(isAuto = false) {
       const modal = document.getElementById('shuffleNoticeModal');
       if (modal) modal.classList.add('active');
@@ -567,7 +532,6 @@ const TenGame = (() => {
       }
       renderBoard(fallingCoords);
 
-      // ★ [팝업 안내 후 자동 셔플 실행] ★
       if (!hasValidMove()) {
         setTimeout(() => {
           triggerShuffleNoticeAndExecute(true);
@@ -899,9 +863,11 @@ const TenGame = (() => {
   }
 
   // ----------------------------------------------------
-  // HALL OF FAME RANKING LOGIC
+  // HALL OF FAME RANKING LOGIC (실제 유저 데이터만 표시)
   // ----------------------------------------------------
   function updateUserRankings() {
+    if (state.nickname === '로그인') return; // 로그인 전 기본상태면 제외
+
     let rankings = getRankings();
 
     if (state.bestBossTime) {
@@ -911,15 +877,19 @@ const TenGame = (() => {
       rankings.time = rankings.time.slice(0, 10);
     }
 
-    rankings.gold = rankings.gold.filter(r => r.nickname !== state.nickname);
-    rankings.gold.push({ nickname: state.nickname, value: state.gold });
-    rankings.gold.sort((a, b) => b.value - a.value);
-    rankings.gold = rankings.gold.slice(0, 10);
+    if (state.gold > 0) {
+      rankings.gold = rankings.gold.filter(r => r.nickname !== state.nickname);
+      rankings.gold.push({ nickname: state.nickname, value: state.gold });
+      rankings.gold.sort((a, b) => b.value - a.value);
+      rankings.gold = rankings.gold.slice(0, 10);
+    }
 
-    rankings.clear = rankings.clear.filter(r => r.nickname !== state.nickname);
-    rankings.clear.push({ nickname: state.nickname, value: state.clearCount });
-    rankings.clear.sort((a, b) => b.value - a.value);
-    rankings.clear = rankings.clear.slice(0, 10);
+    if (state.clearCount > 0) {
+      rankings.clear = rankings.clear.filter(r => r.nickname !== state.nickname);
+      rankings.clear.push({ nickname: state.nickname, value: state.clearCount });
+      rankings.clear.sort((a, b) => b.value - a.value);
+      rankings.clear = rankings.clear.slice(0, 10);
+    }
 
     saveRankings(rankings);
   }
@@ -973,9 +943,19 @@ const TenGame = (() => {
     }
 
     tbody.innerHTML = '';
+
+    if (list.length === 0) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td colspan="3" style="text-align:center; padding: 24px; color: var(--text-muted);">🏆 아직 기록이 없습니다. 로그인하고 첫 랭킹의 주인공이 되어보세요!</td>`;
+      tbody.appendChild(tr);
+      return;
+    }
+
     list.forEach((item, index) => {
       const tr = document.createElement('tr');
-      if (item.nickname === state.nickname) tr.style.background = 'rgba(99, 102, 241, 0.15)';
+      if (item.nickname === state.nickname && state.nickname !== '로그인') {
+        tr.style.background = 'rgba(99, 102, 241, 0.15)';
+      }
 
       let rankClass = `rank-${index + 1}`;
       let valStr = '';
@@ -985,7 +965,7 @@ const TenGame = (() => {
 
       tr.innerHTML = `
         <td class="${rankClass}">${index + 1}위</td>
-        <td style="font-weight: 700;">${item.nickname} ${item.nickname === state.nickname ? '(나)' : ''}</td>
+        <td style="font-weight: 700;">${item.nickname} ${item.nickname === state.nickname && state.nickname !== '로그인' ? '(나)' : ''}</td>
         <td>${valStr}</td>
       `;
       tbody.appendChild(tr);
