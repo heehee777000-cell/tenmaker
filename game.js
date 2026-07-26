@@ -7,7 +7,7 @@ const TenGame = (() => {
   let state = {
     user: null, // Firebase Auth user object
     uid: 'local_player',
-    nickname: '로그인', // ★ [요구사항 반영] 기본 표기를 '로그인'으로 변경
+    nickname: '로그인',
     gold: 150, // 초기 체험 골드
     clearCount: 0,
     bestBossTime: null, // 최단 시간 (초 단위)
@@ -20,7 +20,6 @@ const TenGame = (() => {
   let timerInterval = null;
   let firebaseModule = null;
 
-  // 동적 파이어베이스 모듈 임포트 및 바인딩
   async function initFirebaseModule() {
     try {
       firebaseModule = await import('./firebase-config.js');
@@ -53,9 +52,6 @@ const TenGame = (() => {
     }
   }
 
-  // ----------------------------------------------------
-  // DUMMY RANKING DATA INITIALIZATION
-  // ----------------------------------------------------
   const defaultRankings = {
     time: [
       { nickname: '수학신동', value: 4.82 },
@@ -138,9 +134,6 @@ const TenGame = (() => {
     localStorage.setItem('tenmaker_rankings', JSON.stringify(rankingsObj));
   }
 
-  // ----------------------------------------------------
-  // UI UPDATE & AUTH HANDLERS
-  // ----------------------------------------------------
   function updateHeaderUI() {
     const pName = document.getElementById('playerNickname');
     const authIcon = document.getElementById('userAuthIcon');
@@ -149,7 +142,7 @@ const TenGame = (() => {
       pName.innerText = state.nickname;
       authIcon.className = state.user.isAnonymous ? 'fa-solid fa-user-secret' : 'fa-brands fa-google';
     } else {
-      pName.innerText = '로그인'; // ★ 로그인 전 기본 표기 '로그인'
+      pName.innerText = '로그인';
       authIcon.className = 'fa-solid fa-user-astronaut';
     }
 
@@ -222,9 +215,6 @@ const TenGame = (() => {
     }
   }
 
-  // ----------------------------------------------------
-  // INSTRUCTION POPUP MODAL
-  // ----------------------------------------------------
   const instructionsData = {
     connect: {
       icon: '🔗',
@@ -243,8 +233,8 @@ const TenGame = (() => {
       desc: '25초 동안 격자판에서 상하좌우로 붙어있는 인접 블럭의 합이 10이면 파괴!',
       rules: [
         '상하좌우로 붙어있는 두 블럭 중 합이 10이 되는 조합을 선택하세요.',
-        '3번 블럭은 모두 원형, 4번 블럭은 모두 노란색! 각 숫자별 모양과 색상을 활용해보세요.',
-        '블럭이 터지면 위쪽 블럭들이 아래로 실감나게 미끄러지며 낙하합니다!'
+        '3번 블럭은 원형, 4번 블럭은 노란색! 숫자가 터지면 위 블럭이 떨어진니다.',
+        '💡 만들 수 있는 10 짝이 없으면 판이 자동으로 새로 섞입니다!'
       ],
       action: () => startMiniGame('block')
     },
@@ -389,12 +379,20 @@ const TenGame = (() => {
   }
 
   // ----------------------------------------------------
-  // MINI GAME 2: 10 블럭 크러시 (BLOCK CRASH 10)
+  // MINI GAME 2: 10 블럭 크러시 (BLOCK CRASH 10) - AUTO SHUFFLE & VALID MOVE CHECK
   // ----------------------------------------------------
   function initBlockGame() {
     const playArea = document.getElementById('playArea');
-    playArea.innerHTML = '<div id="blockBoard" class="block-board"></div>';
+    playArea.innerHTML = `
+      <div style="display:flex; flex-direction:column; align-items:center; gap:12px; width:100%;">
+        <div id="blockBoard" class="block-board"></div>
+        <button id="shuffleBtn" class="btn-secondary" style="font-size:0.85rem; padding:6px 14px; border-radius:20px;">
+          🔀 블럭 섞기
+        </button>
+      </div>
+    `;
     const board = document.getElementById('blockBoard');
+    const shuffleBtn = document.getElementById('shuffleBtn');
 
     const ROWS = 5;
     const COLS = 5;
@@ -403,21 +401,78 @@ const TenGame = (() => {
     let earnedGold = 0;
     let selectedBlock = null;
 
+    // 인접 10 조합이 존재하는지 검사
+    function hasValidMove() {
+      const dr = [-1, 1, 0, 0];
+      const dc = [0, 0, -1, 1];
+
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const val1 = gridData[r][c];
+          if (val1 === 0) continue;
+
+          for (let i = 0; i < 4; i++) {
+            const nr = r + dr[i];
+            const nc = c + dc[i];
+            if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
+              const val2 = gridData[nr][nc];
+              if (val2 > 0 && val1 + val2 === 10) {
+                return true; // 10 조합 존재!
+              }
+            }
+          }
+        }
+      }
+      return false; // 조합 없음 (막힌 상태)
+    }
+
     function createBoard() {
       board.innerHTML = '';
       gridData = [];
 
-      let initialFalling = [];
+      do {
+        for (let r = 0; r < ROWS; r++) {
+          gridData[r] = [];
+          for (let c = 0; c < COLS; c++) {
+            gridData[r][c] = Math.floor(Math.random() * 9) + 1;
+          }
+        }
+      } while (!hasValidMove()); // 최소 1개 이상 10 조합이 나올 때까지 생성
+
+      let allCoords = [];
       for (let r = 0; r < ROWS; r++) {
-        gridData[r] = [];
+        for (let c = 0; c < COLS; c++) allCoords.push(`${r}-${c}`);
+      }
+      renderBoard(allCoords);
+    }
+
+    function shuffleBoard() {
+      selectedBlock = null;
+      let values = [];
+      for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) {
-          const val = Math.floor(Math.random() * 9) + 1;
-          gridData[r][c] = val;
-          initialFalling.push(`${r}-${c}`);
+          values.push(gridData[r][c]);
         }
       }
-      renderBoard(initialFalling);
+
+      do {
+        values.sort(() => Math.random() - 0.5);
+        let idx = 0;
+        for (let r = 0; r < ROWS; r++) {
+          for (let c = 0; c < COLS; c++) {
+            gridData[r][c] = values[idx++];
+          }
+        }
+      } while (!hasValidMove());
+
+      let allCoords = [];
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) allCoords.push(`${r}-${c}`);
+      }
+      renderBoard(allCoords);
     }
+
+    shuffleBtn.onclick = () => shuffleBoard();
 
     function renderBoard(fallingCoords = []) {
       board.innerHTML = '';
@@ -501,6 +556,13 @@ const TenGame = (() => {
         }
       }
       renderBoard(fallingCoords);
+
+      // ★ [막힘 자동 감지] 인접 10 조합이 없으면 자동 셔플! ★
+      if (!hasValidMove()) {
+        setTimeout(() => {
+          shuffleBoard();
+        }, 400);
+      }
     }
 
     createBoard();
