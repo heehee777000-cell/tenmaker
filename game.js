@@ -52,7 +52,6 @@ const TenGame = (() => {
     }
   }
 
-  // ★ [수정] 더미 유저 데이터 전면 제거! 오직 실제 플레이 유저만 기록 ★
   const defaultRankings = {
     time: [],
     gold: [],
@@ -71,9 +70,7 @@ const TenGame = (() => {
       } catch (e) { console.error(e); }
     }
 
-    // 더미 랭킹 삭제 처리
     localStorage.removeItem('tenmaker_rankings');
-
     updateHeaderUI();
   }
 
@@ -863,10 +860,10 @@ const TenGame = (() => {
   }
 
   // ----------------------------------------------------
-  // HALL OF FAME RANKING LOGIC (실제 유저 데이터만 표시)
+  // HALL OF FAME RANKING LOGIC (즉시 팝업 모달 오픈 보장!)
   // ----------------------------------------------------
   function updateUserRankings() {
-    if (state.nickname === '로그인') return; // 로그인 전 기본상태면 제외
+    if (state.nickname === '로그인') return;
 
     let rankings = getRankings();
 
@@ -894,14 +891,22 @@ const TenGame = (() => {
     saveRankings(rankings);
   }
 
+  // ★ [수정] 클릭 반응성 100% 보장: 모달부터 즉시 열고 랭킹 데이터 렌더링 ★
   async function openHallOfFame() {
-    updateUserRankings();
-    await renderHallTable(state.currentTab);
-    document.getElementById('hallModal').classList.add('active');
+    const modal = document.getElementById('hallModal');
+    if (modal) modal.classList.add('active');
+
+    try {
+      updateUserRankings();
+      await renderHallTable(state.currentTab);
+    } catch (e) {
+      console.error("Hall of Fame load error:", e);
+    }
   }
 
   function closeHallOfFame() {
-    document.getElementById('hallModal').classList.remove('active');
+    const modal = document.getElementById('hallModal');
+    if (modal) modal.classList.remove('active');
   }
 
   async function switchHallTab(tabName) {
@@ -919,11 +924,15 @@ const TenGame = (() => {
   async function renderHallTable(tabName) {
     let list = [];
 
-    if (firebaseModule && firebaseModule.fetchTopRankingsFromFirestore) {
-      const dbList = await firebaseModule.fetchTopRankingsFromFirestore(tabName);
-      if (dbList && dbList.length > 0) {
-        list = dbList;
+    try {
+      if (firebaseModule && firebaseModule.fetchTopRankingsFromFirestore) {
+        const dbList = await firebaseModule.fetchTopRankingsFromFirestore(tabName);
+        if (dbList && dbList.length > 0) {
+          list = dbList;
+        }
       }
+    } catch (err) {
+      console.warn("Firestore ranking fetch error fallback:", err);
     }
 
     if (list.length === 0) {
@@ -933,6 +942,7 @@ const TenGame = (() => {
 
     const tbody = document.getElementById('rankingListBody');
     const header = document.getElementById('rankingHeader');
+    if (!tbody || !header) return;
 
     if (tabName === 'time') {
       header.innerHTML = `<th>순위</th><th>유저 닉네임</th><th>최단 클리어 시간</th>`;
@@ -946,7 +956,7 @@ const TenGame = (() => {
 
     if (list.length === 0) {
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td colspan="3" style="text-align:center; padding: 24px; color: var(--text-muted);">🏆 아직 기록이 없습니다. 로그인하고 첫 랭킹의 주인공이 되어보세요!</td>`;
+      tr.innerHTML = `<td colspan="3" style="text-align:center; padding: 24px; color: var(--text-muted);">🏆 아직 기록이 없습니다. 첫 랭킹의 주인공이 되어보세요!</td>`;
       tbody.appendChild(tr);
       return;
     }

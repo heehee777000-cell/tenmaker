@@ -120,7 +120,9 @@
             <h3>명예의 전당</h3>
             <p>보스전 최단시간, 골드왕, 클리어왕 TOP 10 랭킹을 확인하세요!</p>
           </div>
-          <button class="btn-hall">랭킹 보기 <i class="fa-solid fa-chevron-right"></i></button>
+          <button class="btn-hall" onclick="TenGame.openHallOfFame(); event.stopPropagation();">
+            랭킹 보기 <i class="fa-solid fa-chevron-right"></i>
+          </button>
         </div>
 
       </section>
@@ -185,7 +187,7 @@
       </div>
     </div>
 
-    <!-- SHUFFLE NOTICE POPUP MODAL (NEW: 블럭 셔플 안내 팝업) -->
+    <!-- SHUFFLE NOTICE POPUP MODAL -->
     <div id="shuffleNoticeModal" class="modal-backdrop">
       <div class="modal-card shuffle-modal-card">
         <div class="shuffle-icon">🔀</div>
