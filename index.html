@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>TenMaker - 10의 연금술사 (10 만들기 미니게임 & 보스 레이드)</title>
-  <meta name="description" content="10을 만드는 3가지 흥미진진한 미니게임과 모은 골드로 도전하는 보스 레이드! 구글/익명 로그인으로 명예의 전당 랭킹에 도전하세요.">
+  <title>TenHeroes - 텐히어로즈 (10의 보수를 완성하는 영웅들)</title>
+  <meta name="description" content="10을 완성하고 10의 마왕을 퇴치할 전설의 영웅은 누구인가! 3가지 영웅 미니게임과 영웅의 전당 실시간 랭킹 도전.">
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,8 +19,8 @@
     <!-- TOP HEADER / PLAYER STATS BAR -->
     <header class="top-bar">
       <div class="logo-area">
-        <i class="fa-solid fa-gem glow-icon"></i>
-        <h1 class="logo-title">TEN<span class="highlight">MAKER</span></h1>
+        <i class="fa-solid fa-shield-cat glow-icon"></i>
+        <h1 class="logo-title">TEN<span class="highlight">HEROES</span></h1>
       </div>
       <div class="user-stats">
         <!-- AUTH & PROFILE PILL -->
@@ -33,7 +33,7 @@
           <span id="userGold">0</span> G
         </div>
         <div class="stat-pill clear-pill">
-          <i class="fa-solid fa-trophy clear-icon"></i>
+          <i class="fa-solid fa-crown clear-icon"></i>
           <span id="userClearCount">0</span>회
         </div>
       </div>
@@ -42,49 +42,49 @@
     <!-- MAIN MENU CONTAINER -->
     <main id="mainMenu" class="screen active">
       <div class="hero-banner">
-        <div class="hero-badge">10의 보수를 익히는 수학 어드벤처</div>
-        <h2>10을 완성하고 <span class="text-gradient">보스에 도전하라!</span></h2>
-        <p>3가지 미니게임으로 골드를 모으고 10문제 연속 타임어택 보스전으로 명예의 전당에 이름을 올리세요.</p>
+        <div class="hero-badge">🛡️ 10의 힘을 다스리는 전설의 영웅들</div>
+        <h2>10의 보수를 결속하고 <span class="text-gradient">마왕을 퇴치하라!</span></h2>
+        <p>3가지 영웅의 시험(미니게임)으로 골드를 모으고 10문제 스피드런 보스 레이드로 영웅의 전당 왕좌를 차지하세요.</p>
       </div>
 
       <!-- GAME SELECT GRID -->
       <section class="game-select-section">
-        <h3 class="section-title"><i class="fa-solid fa-gamepad"></i> 연습 미니게임 (제한시간 25초)</h3>
+        <h3 class="section-title"><i class="fa-solid fa-wand-magic-sparkles"></i> 영웅의 관문 (제한시간 25초)</h3>
         <div class="card-grid">
           
           <!-- MINI GAME 1 -->
           <div class="game-card connect-card" onclick="TenGame.openInstruction('connect')">
-            <div class="card-badge">게임 1</div>
+            <div class="card-badge">시험 1</div>
             <div class="card-icon">🔗</div>
-            <h4>10 짝짓기</h4>
-            <p>화면의 타일 중 <strong>합이 10이 되는 두 숫자</strong>를 짝지어 연결하여 파괴하세요!</p>
+            <h4>10 짝짓기 결속</h4>
+            <p>10이 되는 <strong>두 영웅 숫자의 결속</strong>을 완성하여 짝지어 파괴하세요!</p>
             <div class="card-footer">
               <span><i class="fa-solid fa-clock"></i> 25초</span>
-              <button class="btn-play">플레이 <i class="fa-solid fa-play"></i></button>
+              <button class="btn-play">도전하기 <i class="fa-solid fa-play"></i></button>
             </div>
           </div>
 
           <!-- MINI GAME 2 -->
           <div class="game-card block-card" onclick="TenGame.openInstruction('block')">
-            <div class="card-badge">게임 2</div>
+            <div class="card-badge">시험 2</div>
             <div class="card-icon">🧱</div>
-            <h4>10 블럭 크러시</h4>
-            <p>격자판에서 <strong>인접한 두 블럭의 합이 10</strong>이 되면 터뜨리세요! 연속 낙하 콤보!</p>
+            <h4>10 원소 블럭 크러시</h4>
+            <p><strong>인접 10 원소 블럭의 폭발</strong>을 유도하여 연속 낙하 콤보를 달성하세요!</p>
             <div class="card-footer">
               <span><i class="fa-solid fa-clock"></i> 25초</span>
-              <button class="btn-play">플레이 <i class="fa-solid fa-play"></i></button>
+              <button class="btn-play">도전하기 <i class="fa-solid fa-play"></i></button>
             </div>
           </div>
 
           <!-- MINI GAME 3 -->
           <div class="game-card math-rush-card" onclick="TenGame.openInstruction('math')">
-            <div class="card-badge">게임 3</div>
+            <div class="card-badge">시험 3</div>
             <div class="card-icon">⚡</div>
-            <h4>10 수식 스피드 러시</h4>
-            <p><code>? + 4 = 10</code>, <code>10 - ? = 3</code> 수식의 빈칸 정답을 빛의 속도로 선택하세요!</p>
+            <h4>10 수식 스피드 퀴즈</h4>
+            <p><code>? + 4 = 10</code> 빛의 속도로 수식을 꿰뚫어 빈칸의 영웅 숫자를 선택하세요!</p>
             <div class="card-footer">
               <span><i class="fa-solid fa-clock"></i> 25초</span>
-              <button class="btn-play">플레이 <i class="fa-solid fa-play"></i></button>
+              <button class="btn-play">도전하기 <i class="fa-solid fa-play"></i></button>
             </div>
           </div>
 
@@ -100,28 +100,28 @@
             <span class="boss-emoji">👹</span>
           </div>
           <div class="boss-info">
-            <div class="boss-tag">FINAL STAGE</div>
+            <div class="boss-tag">FINAL HERO TRIAL</div>
             <h3>10의 마왕 보스 레이드</h3>
-            <p>10을 만드는 핵심 문제 10개 연속 출제! 최단 시간 타임어택 도전!</p>
+            <p>10을 만드는 10문제를 연속 돌파! 최단 시간으로 마왕을 봉인하세요.</p>
             <div class="boss-req">
               <span>입장료: <strong>100 Gold</strong></span>
-              <span id="bestTimeDisplay" class="best-time">내 최단 기록: -</span>
+              <span id="bestTimeDisplay" class="best-time">내 영웅 기록: -</span>
             </div>
           </div>
           <button id="bossStartBtn" class="btn-boss" onclick="TenGame.openInstruction('boss')">
-            보스 도전하기 <i class="fa-solid fa-skull"></i>
+            마왕 퇴치 도전 <i class="fa-solid fa-skull"></i>
           </button>
         </div>
 
         <!-- HALL OF FAME QUICK BTN CARD -->
         <div class="hall-card" onclick="TenGame.openHallOfFame()">
-          <div class="hall-icon"><i class="fa-solid fa-trophy"></i></div>
+          <div class="hall-icon"><i class="fa-solid fa-crown"></i></div>
           <div class="hall-info">
-            <h3>명예의 전당</h3>
-            <p>보스전 최단시간, 골드왕, 클리어왕 TOP 10 랭킹을 확인하세요!</p>
+            <h3>영웅의 전당</h3>
+            <p>최단 마왕 봉인 시간, 최고 골드, 클리어 왕좌 TOP 10 랭킹 확인!</p>
           </div>
           <button class="btn-hall" onclick="TenGame.openHallOfFame(); event.stopPropagation();">
-            랭킹 보기 <i class="fa-solid fa-chevron-right"></i>
+            왕좌 보기 <i class="fa-solid fa-chevron-right"></i>
           </button>
         </div>
 
@@ -158,7 +158,7 @@
       <div class="boss-stage-header">
         <button class="btn-close" onclick="TenGame.quitCurrentGame()"><i class="fa-solid fa-xmark"></i> 포기하기</button>
         <div class="boss-timer">
-          <i class="fa-solid fa-stopwatch-20"></i> 소요시간: <span id="bossTimer">0.00</span>초
+          <i class="fa-solid fa-stopwatch-20"></i> 봉인 소요시간: <span id="bossTimer">0.00</span>초
         </div>
       </div>
 
@@ -179,7 +179,7 @@
 
       <!-- BOSS QUIZ CONTAINER -->
       <div class="boss-quiz-card">
-        <div class="quiz-step-badge">문제 <span id="bossQuizStep">1</span> / 10</div>
+        <div class="quiz-step-badge">영웅 관문 <span id="bossQuizStep">1</span> / 10</div>
         <div id="bossQuizQuestion" class="boss-quiz-question">? + 4 = 10</div>
         <div id="bossQuizOptions" class="boss-quiz-options">
           <!-- Answer Options rendered dynamically -->
@@ -191,16 +191,16 @@
     <div id="shuffleNoticeModal" class="modal-backdrop">
       <div class="modal-card shuffle-modal-card">
         <div class="shuffle-icon">🔀</div>
-        <h3>만들 수 있는 10 블럭이 없습니다!</h3>
-        <p>인접한 10의 보수 블럭이 없어<br><strong>블럭판을 자동으로 새로 섞습니다.</strong></p>
+        <h3>만들 수 있는 10 원소 블럭이 없습니다!</h3>
+        <p>인접한 10의 보수 블럭이 없어<br><strong>블럭판을 자동으로 새로 재배치합니다.</strong></p>
       </div>
     </div>
 
     <!-- INSTRUCTION MODAL -->
     <div id="instructionModal" class="modal-backdrop">
       <div class="modal-card instruction-modal-card">
-        <div id="instructIcon" class="instruct-icon">🎮</div>
-        <h3 id="instructTitle">게임 설명</h3>
+        <div id="instructIcon" class="instruct-icon">🛡️</div>
+        <h3 id="instructTitle">영웅의 시험</h3>
         <div class="instruct-body">
           <p id="instructDesc">게임 방법 안내입니다.</p>
           <div id="instructRules" class="instruct-rules">
@@ -209,7 +209,7 @@
         </div>
         <div class="modal-actions">
           <button class="btn-secondary" onclick="TenGame.closeInstruction()">돌아가기</button>
-          <button id="instructStartBtn" class="btn-primary">게임 시작! <i class="fa-solid fa-play"></i></button>
+          <button id="instructStartBtn" class="btn-primary">시험 시작! <i class="fa-solid fa-play"></i></button>
         </div>
       </div>
     </div>
@@ -218,28 +218,28 @@
     <div id="authModal" class="modal-backdrop">
       <div class="modal-card auth-modal-card">
         <div class="modal-header">
-          <h3><i class="fa-solid fa-shield-halved"></i> 계정 로그인</h3>
+          <h3><i class="fa-solid fa-shield-halved"></i> 영웅 계정 등록</h3>
           <button class="btn-close-icon" onclick="TenGame.closeAuthModal()"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <p class="auth-desc">파이어베이스 로그인으로 데이터를 동기화하고 명예의 전당 랭킹에 등록해보세요!</p>
+        <p class="auth-desc">파이어베이스 로그인으로 전설의 영웅 기록을 저장하고 영웅의 전당 왕좌에 등록해보세요!</p>
 
         <div id="authOptions" class="auth-options">
           <button class="btn-auth btn-google" onclick="TenGame.handleGoogleLogin()">
-            <i class="fa-brands fa-google"></i> 구글 계정으로 로그인
+            <i class="fa-brands fa-google"></i> 구글 영웅 계정으로 로그인
           </button>
           <button class="btn-auth btn-anon" onclick="TenGame.handleAnonLogin()">
-            <i class="fa-solid fa-user-secret"></i> 익명 계정으로 즉시 플레이
+            <i class="fa-solid fa-user-secret"></i> 익명 영웅으로 즉시 플레이
           </button>
         </div>
 
         <div id="authProfileView" class="auth-profile-view" style="display: none;">
           <div class="profile-info-box">
-            <div class="profile-name" id="loggedInName">사용자</div>
+            <div class="profile-name" id="loggedInName">영웅</div>
             <div class="profile-type" id="loggedInType">구글 계정</div>
           </div>
           <div class="nickname-edit-box">
-            <label>닉네임 수정</label>
-            <input type="text" id="nicknameInput" maxlength="10" placeholder="닉네임 입력 (최대 10자)" />
+            <label>영웅 닉네임 수정</label>
+            <input type="text" id="nicknameInput" maxlength="10" placeholder="영웅 닉네임 입력 (최대 10자)" />
             <button class="btn-primary" onclick="TenGame.saveProfileNickname()">닉네임 변경</button>
           </div>
           <button class="btn-secondary btn-logout" onclick="TenGame.handleLogout()">
@@ -253,8 +253,8 @@
     <div id="resultModal" class="modal-backdrop">
       <div class="modal-card">
         <div id="resultIcon" class="result-icon">🎉</div>
-        <h3 id="resultTitle">게임 완료!</h3>
-        <p id="resultDesc">수고하셨습니다!</p>
+        <h3 id="resultTitle">시험 완료!</h3>
+        <p id="resultDesc">훌륭한 영웅입니다!</p>
         <div class="result-stats" id="resultStats">
           <!-- Result Stats -->
         </div>
@@ -268,15 +268,15 @@
     <div id="hallModal" class="modal-backdrop">
       <div class="modal-card hall-modal-card">
         <div class="modal-header">
-          <h3><i class="fa-solid fa-trophy gold-icon"></i> 명예의 전당 (TOP 10)</h3>
+          <h3><i class="fa-solid fa-crown gold-icon"></i> 영웅의 전당 (TOP 10)</h3>
           <button class="btn-close-icon" onclick="TenGame.closeHallOfFame()"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
         <!-- TAB BUTTONS -->
         <div class="hall-tabs">
-          <button class="tab-btn active" onclick="TenGame.switchHallTab('time')">⏱️ 보스전 스피드런</button>
-          <button class="tab-btn" onclick="TenGame.switchHallTab('gold')">💰 골드 부자</button>
-          <button class="tab-btn" onclick="TenGame.switchHallTab('clear')">🎖️ 미니게임 클리어</button>
+          <button class="tab-btn active" onclick="TenGame.switchHallTab('time')">⏱️ 최단 마왕 봉인</button>
+          <button class="tab-btn" onclick="TenGame.switchHallTab('gold')">💰 골드 왕좌</button>
+          <button class="tab-btn" onclick="TenGame.switchHallTab('clear')">🎖️ 영웅 클리어 왕</button>
         </div>
 
         <!-- RANKING LIST TABLE CONTAINER -->
@@ -285,7 +285,7 @@
             <thead>
               <tr id="rankingHeader">
                 <th>순위</th>
-                <th>유저 닉네임</th>
+                <th>영웅 닉네임</th>
                 <th>기록</th>
               </tr>
             </thead>

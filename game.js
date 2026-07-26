@@ -1,4 +1,4 @@
-/* TENMAKER - MAIN GAME ENGINE & LOGIC */
+/* TENHEROES - MAIN GAME ENGINE & LOGIC */
 
 const TenGame = (() => {
   // ----------------------------------------------------
@@ -12,10 +12,10 @@ const TenGame = (() => {
     clearCount: 0,
     bestBossTime: null, // 최단 시간 (초 단위)
     activeScreen: 'mainMenu',
-    currentTab: 'time' // 명예의 전당 기본 탭 ('time', 'gold', 'clear')
+    currentTab: 'time' // 영웅의 전당 기본 탭 ('time', 'gold', 'clear')
   };
 
-  let currentGame = null; // 미니게임 / 보스전 실행 객체
+  let currentGame = null;
   let gameInterval = null;
   let timerInterval = null;
   let firebaseModule = null;
@@ -28,7 +28,7 @@ const TenGame = (() => {
           if (firebaseUser) {
             state.user = firebaseUser;
             state.uid = firebaseUser.uid;
-            state.nickname = firebaseUser.displayName || (state.nickname === '로그인' ? '10연금술사' : state.nickname);
+            state.nickname = firebaseUser.displayName || (state.nickname === '로그인' ? '전설의영웅' : state.nickname);
             
             const dbData = await firebaseModule.fetchUserDataFromFirestore(firebaseUser.uid);
             if (dbData) {
@@ -59,7 +59,7 @@ const TenGame = (() => {
   };
 
   function loadData() {
-    const savedUser = localStorage.getItem('tenmaker_user');
+    const savedUser = localStorage.getItem('tenheroes_user');
     if (savedUser) {
       try {
         const parsed = JSON.parse(savedUser);
@@ -70,12 +70,11 @@ const TenGame = (() => {
       } catch (e) { console.error(e); }
     }
 
-    localStorage.removeItem('tenmaker_rankings');
     updateHeaderUI();
   }
 
   function saveData() {
-    localStorage.setItem('tenmaker_user', JSON.stringify({
+    localStorage.setItem('tenheroes_user', JSON.stringify({
       nickname: state.nickname,
       gold: state.gold,
       clearCount: state.clearCount,
@@ -89,12 +88,12 @@ const TenGame = (() => {
   }
 
   function getRankings() {
-    const data = localStorage.getItem('tenmaker_rankings_real');
+    const data = localStorage.getItem('tenheroes_rankings');
     return data ? JSON.parse(data) : defaultRankings;
   }
 
   function saveRankings(rankingsObj) {
-    localStorage.setItem('tenmaker_rankings_real', JSON.stringify(rankingsObj));
+    localStorage.setItem('tenheroes_rankings', JSON.stringify(rankingsObj));
   }
 
   function updateHeaderUI() {
@@ -106,14 +105,14 @@ const TenGame = (() => {
       authIcon.className = state.user.isAnonymous ? 'fa-solid fa-user-secret' : 'fa-brands fa-google';
     } else {
       pName.innerText = '로그인';
-      authIcon.className = 'fa-solid fa-user-astronaut';
+      authIcon.className = 'fa-solid fa-shield-halved';
     }
 
     document.getElementById('userGold').innerText = state.gold.toLocaleString();
     document.getElementById('userClearCount').innerText = state.clearCount;
     
     const bestTimeStr = state.bestBossTime ? `${state.bestBossTime.toFixed(2)}초` : '미기록';
-    document.getElementById('bestTimeDisplay').innerText = `내 최단 기록: ${bestTimeStr}`;
+    document.getElementById('bestTimeDisplay').innerText = `내 영웅 기록: ${bestTimeStr}`;
   }
 
   function openAuthModal() {
@@ -127,7 +126,7 @@ const TenGame = (() => {
       optBox.style.display = 'none';
       profileBox.style.display = 'flex';
       document.getElementById('loggedInName').innerText = state.nickname;
-      document.getElementById('loggedInType').innerText = state.user.isAnonymous ? '👤 익명 계정' : `🌐 구글 계정 (${state.user.email || ''})`;
+      document.getElementById('loggedInType').innerText = state.user.isAnonymous ? '👤 익명 영웅' : `🌐 구글 영웅 계정 (${state.user.email || ''})`;
       document.getElementById('nicknameInput').value = state.nickname;
     } else {
       optBox.style.display = 'flex';
@@ -148,7 +147,7 @@ const TenGame = (() => {
         const user = await firebaseModule.loginWithGoogle();
         if (user) {
           closeAuthModal();
-          alert(`🎉 환영합니다, ${user.displayName || '플레이어'}님!`);
+          alert(`🎉 전설의 영웅으로 로그인되었습니다, ${user.displayName || '영웅'}님!`);
         }
       } catch (e) { console.error(e); }
     }
@@ -161,7 +160,7 @@ const TenGame = (() => {
         const user = await firebaseModule.loginAnonymously();
         if (user) {
           closeAuthModal();
-          alert("👤 익명 계정으로 로그인되었습니다. 기록이 안전하게 저장됩니다!");
+          alert("👤 익명 영웅으로 전장에 참여하셨습니다!");
         }
       } catch (e) { console.error(e); }
     }
@@ -181,33 +180,33 @@ const TenGame = (() => {
   const instructionsData = {
     connect: {
       icon: '🔗',
-      title: '10 짝짓기 (Ten Connect)',
-      desc: '25초 동안 화면의 숫자 타일 중 합이 10이 되는 짝을 찾아 짝지어 보세요!',
+      title: '10 짝짓기 결속 (Ten Connect)',
+      desc: '25초 동안 영웅의 힘으로 합이 10이 되는 짝꿍 숫자들을 짝지어 결속을 완성하세요!',
       rules: [
-        '첫 번째 숫자 타일을 선택 후, 합이 10이 되는 짝꿍 타일을 터치합니다.',
-        '짝이 맞으면 타일이 파괴되며 점수(+120)와 골드(+12)를 획득합니다.',
-        '판의 타일을 모두 지우면 새 타일 판이 공급됩니다.'
+        '첫 번째 숫자 선택 후, 합이 10이 되는 짝꿍 숫자를 터치합니다.',
+        '짝이 연결되면 숫자가 파괴되며 점수(+120)와 영웅 골드(+12)를 획득합니다.',
+        '판의 숫자를 모두 해제하면 새로운 10 결속 판이 공급됩니다.'
       ],
       action: () => startMiniGame('connect')
     },
     block: {
       icon: '🧱',
-      title: '10 블럭 크러시 (Block Crash 10)',
-      desc: '25초 동안 격자판에서 상하좌우로 붙어있는 인접 블럭의 합이 10이면 파괴!',
+      title: '10 원소 블럭 크러시 (Block Crash 10)',
+      desc: '25초 동안 상하좌우로 붙어있는 인접 10 원소 블럭을 폭발시켜 연쇄 낙하를 이루세요!',
       rules: [
-        '상하좌우로 붙어있는 두 블럭 중 합이 10이 되는 조합을 선택하세요.',
-        '3번 블럭은 원형, 4번 블럭은 노란색! 숫자가 터지면 위 블럭이 떨어집니다.',
-        '💡 만들 수 있는 10 짝이 없으면 팝업 안내 후 판이 자동으로 새로 섞입니다!'
+        '상하좌우로 붙어있는 두 원소 블럭 중 합이 10이 되는 조합을 선택합니다.',
+        '3번 블럭은 원형, 4번 블럭은 황금색! 숫자가 터지면 위 원소가 떨어집니다.',
+        '💡 만들 수 있는 10 짝이 없으면 팝업 안내 후 원소판이 자동으로 새로 재배치됩니다!'
       ],
       action: () => startMiniGame('block')
     },
     math: {
       icon: '⚡',
-      title: '10 수식 스피드 러시 (Math Rush 10)',
-      desc: '25초 동안 빠르게 출제되는 10 만들기 수식의 빈칸 정답을 빛의 속도로 탭하세요!',
+      title: '10 수식 스피드 퀴즈 (Math Rush 10)',
+      desc: '25초 동안 빠르게 출제되는 10 수식의 빈칸 정답을 빛의 속도로 꿰뚫어 선택하세요!',
       rules: [
         '? + 4 = 10, 10 - ? = 3 등의 빈칸 수식이 출제됩니다.',
-        '아래 4개 보기 중 정답 숫자를 클릭하세요.',
+        '아래 4개 영웅 숫자 보기 중 정답을 빠르게 클릭하세요.',
         '연속으로 정답을 맞추면 콤보 보너스 골드가 지급됩니다.'
       ],
       action: () => startMiniGame('math')
@@ -215,12 +214,12 @@ const TenGame = (() => {
     boss: {
       icon: '👹',
       title: '10의 마왕 보스 레이드 (Boss Raid)',
-      desc: '10을 만드는 10개의 핵심 퀴즈를 연속으로 해결해 최단 클리어 기록에 도전하세요!',
+      desc: '10을 만드는 10개의 핵심 퀴즈를 연쇄 해결하여 마왕을 봉인하고 최단 신기록을 달성하세요!',
       rules: [
         '도전 조건: 100 Gold 소모.',
-        '10문제를 정답 제출할 때마다 보스의 HP가 감소합니다.',
-        '오답 제출 시 +1초 시간 패널티가 부과됩니다.',
-        '10문제를 모두 풀면 보스 퇴치 완료! 소요 시간이 명예의 전당 랭킹에 등록됩니다.'
+        '10문제를 정답 제출할 때마다 마왕의 HP가 감소합니다.',
+        '오답 제출 시 +1초 봉인 지연 패널티가 부과됩니다.',
+        '10문제를 모두 풀면 마왕 봉인 완료! 소요 시간이 영웅의 전당 왕좌에 등록됩니다.'
       ],
       action: () => startBossRaid()
     }
@@ -239,7 +238,7 @@ const TenGame = (() => {
     data.rules.forEach(rule => {
       const item = document.createElement('div');
       item.className = 'instruct-rule-item';
-      item.innerHTML = `<i class="fa-solid fa-check-circle"></i> <span>${rule}</span>`;
+      item.innerHTML = `<i class="fa-solid fa-shield-cat"></i> <span>${rule}</span>`;
       rulesContainer.appendChild(item);
     });
 
@@ -335,14 +334,14 @@ const TenGame = (() => {
     setupTiles();
 
     return {
-      name: '🔗 10 짝짓기',
+      name: '🔗 10 짝짓기 결속',
       getScore: () => score,
       getEarnedGold: () => earnedGold
     };
   }
 
   // ----------------------------------------------------
-  // MINI GAME 2: 10 블럭 크러시 (BLOCK CRASH 10)
+  // MINI GAME 2: 10 원소 블럭 크러시
   // ----------------------------------------------------
   function initBlockGame() {
     const playArea = document.getElementById('playArea');
@@ -350,7 +349,7 @@ const TenGame = (() => {
       <div style="display:flex; flex-direction:column; align-items:center; gap:12px; width:100%;">
         <div id="blockBoard" class="block-board"></div>
         <button id="shuffleBtn" class="btn-secondary" style="font-size:0.85rem; padding:6px 14px; border-radius:20px;">
-          🔀 블럭 섞기
+          🔀 원소 블럭 섞기
         </button>
       </div>
     `;
@@ -408,7 +407,7 @@ const TenGame = (() => {
       renderBoard(allCoords);
     }
 
-    function triggerShuffleNoticeAndExecute(isAuto = false) {
+    function triggerShuffleNoticeAndExecute() {
       const modal = document.getElementById('shuffleNoticeModal');
       if (modal) modal.classList.add('active');
 
@@ -531,7 +530,7 @@ const TenGame = (() => {
 
       if (!hasValidMove()) {
         setTimeout(() => {
-          triggerShuffleNoticeAndExecute(true);
+          triggerShuffleNoticeAndExecute();
         }, 300);
       }
     }
@@ -539,7 +538,7 @@ const TenGame = (() => {
     createBoard();
 
     return {
-      name: '🧱 10 블럭 크러시',
+      name: '🧱 10 원소 블럭 크러시',
       getScore: () => score,
       getEarnedGold: () => earnedGold
     };
@@ -618,7 +617,7 @@ const TenGame = (() => {
     nextQuiz();
 
     return {
-      name: '⚡ 10 수식 스피드 러시',
+      name: '⚡ 10 수식 스피드 퀴즈',
       getScore: () => score,
       getEarnedGold: () => earnedGold
     };
@@ -667,9 +666,9 @@ const TenGame = (() => {
 
     updateUserRankings();
 
-    showResultModal('🎉 미니게임 클리어!', `${currentGame.name}을(를) 완료했습니다.`, [
-      { label: '최종 점수', val: `${score} 점` },
-      { label: '획득 골드', val: `+${gold} Gold` }
+    showResultModal('🎉 영웅의 시험 클리어!', `${currentGame.name}을(를) 완수하셨습니다.`, [
+      { label: '획득한 점수', val: `${score} 점` },
+      { label: '획득한 골드', val: `+${gold} Gold` }
     ]);
   }
 
@@ -691,7 +690,7 @@ const TenGame = (() => {
 
   function startBossRaid() {
     if (state.gold < 100) {
-      alert('보스 레이드에 도전하려면 100 Gold가 필요합니다! 미니게임을 플레이하여 골드를 모아보세요.');
+      alert('마왕 퇴치에 도전하려면 100 Gold가 필요합니다! 영웅의 시험을 수행하여 골드를 모아보세요.');
       return;
     }
 
@@ -787,7 +786,7 @@ const TenGame = (() => {
     } else {
       bossStartTime -= 1000;
       const dmg = document.getElementById('bossDamageFloat');
-      dmg.innerText = '+1.00s 패널티!';
+      dmg.innerText = '+1.00s 지연!';
       dmg.style.color = '#ef4444';
       dmg.classList.add('show');
       setTimeout(() => dmg.classList.remove('show'), 600);
@@ -825,11 +824,11 @@ const TenGame = (() => {
     updateUserRankings();
 
     showResultModal(
-      '🏆 10의 마왕 퇴치 성공!',
-      isNewRecord ? '🎉 최고 최단 클리어 신기록 달성!' : '보스를 물리치고 대량의 골드를 획득했습니다.',
+      '🏆 10의 마왕 봉인 성공!',
+      isNewRecord ? '🎉 영웅의 최단 신기록 왕좌 달성!' : '마왕을 퇴치하고 영웅의 전리품 골드를 얻었습니다.',
       [
-        { label: '소요 시간 (스피드런)', val: `${timeFormatted} 초` },
-        { label: '클리어 보상', val: `+${bossRewardGold} Gold` }
+        { label: '봉인 소요 시간', val: `${timeFormatted} 초` },
+        { label: '영웅 전리품', val: `+${bossRewardGold} Gold` }
       ]
     );
   }
@@ -860,7 +859,7 @@ const TenGame = (() => {
   }
 
   // ----------------------------------------------------
-  // HALL OF FAME RANKING LOGIC (즉시 팝업 모달 오픈 보장!)
+  // HALL OF FAME RANKING LOGIC (영웅의 전당)
   // ----------------------------------------------------
   function updateUserRankings() {
     if (state.nickname === '로그인') return;
@@ -891,7 +890,6 @@ const TenGame = (() => {
     saveRankings(rankings);
   }
 
-  // ★ [수정] 클릭 반응성 100% 보장: 모달부터 즉시 열고 랭킹 데이터 렌더링 ★
   async function openHallOfFame() {
     const modal = document.getElementById('hallModal');
     if (modal) modal.classList.add('active');
@@ -900,7 +898,7 @@ const TenGame = (() => {
       updateUserRankings();
       await renderHallTable(state.currentTab);
     } catch (e) {
-      console.error("Hall of Fame load error:", e);
+      console.error("Hall of Heroes load error:", e);
     }
   }
 
@@ -945,18 +943,18 @@ const TenGame = (() => {
     if (!tbody || !header) return;
 
     if (tabName === 'time') {
-      header.innerHTML = `<th>순위</th><th>유저 닉네임</th><th>최단 클리어 시간</th>`;
+      header.innerHTML = `<th>순위</th><th>영웅 닉네임</th><th>마왕 봉인 시간</th>`;
     } else if (tabName === 'gold') {
-      header.innerHTML = `<th>순위</th><th>유저 닉네임</th><th>보유 골드</th>`;
+      header.innerHTML = `<th>순위</th><th>영웅 닉네임</th><th>보유 골드</th>`;
     } else {
-      header.innerHTML = `<th>순위</th><th>유저 닉네임</th><th>미니게임 클리어 수</th>`;
+      header.innerHTML = `<th>순위</th><th>영웅 닉네임</th><th>시험 완수 횟수</th>`;
     }
 
     tbody.innerHTML = '';
 
     if (list.length === 0) {
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td colspan="3" style="text-align:center; padding: 24px; color: var(--text-muted);">🏆 아직 기록이 없습니다. 첫 랭킹의 주인공이 되어보세요!</td>`;
+      tr.innerHTML = `<td colspan="3" style="text-align:center; padding: 24px; color: var(--text-muted);">👑 아직 기록된 영웅이 없습니다. 첫 번째 영웅 왕좌에 올라보세요!</td>`;
       tbody.appendChild(tr);
       return;
     }
@@ -989,7 +987,7 @@ const TenGame = (() => {
       saveData();
       updateUserRankings();
       closeAuthModal();
-      alert(`닉네임이 '${input}'(으)로 변경되었습니다!`);
+      alert(`영웅 닉네임이 '${input}'(으)로 변경되었습니다!`);
     }
   }
 
