@@ -1,8 +1,10 @@
-/* TENMAKER - FIREBASE AUTH & FIRESTORE INTEGRATION MODULE */
+/* TENHEROES - FIREBASE AUTH & FIRESTORE INTEGRATION MODULE */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { 
   getAuth, 
   signInWithPopup, 
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider, 
   signInAnonymously, 
   onAuthStateChanged, 
@@ -20,9 +22,7 @@ import {
   getDocs 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// =========================================================================
-// FIREBASE LIVE CONFIGURATION (발급받으신 파이어베이스 실제 설정값 연동)
-// =========================================================================
+// FIREBASE LIVE CONFIGURATION
 const firebaseConfig = {
   apiKey: "AIzaSyCcUyTn9EPTNfvDi8UOhu1Zxul_liQarCI",
   authDomain: "tenmaker-35307.firebaseapp.com",
@@ -32,7 +32,6 @@ const firebaseConfig = {
   appId: "1:755129763982:web:492232c3b91875430421df"
 };
 
-// Firebase 앱 및 서비스 초기화
 let app, auth, db;
 let isFirebaseConfigured = true;
 
@@ -41,27 +40,54 @@ try {
   auth = getAuth(app);
   db = getFirestore(app);
   console.log("🔥 Firebase Live SDK connected successfully!");
+
+  // 모바일 리디렉션 로그인 결과 자동 수신 처리
+  getRedirectResult(auth).then((result) => {
+    if (result && result.user) {
+      console.log("Mobile Redirect Login Success:", result.user.displayName);
+    }
+  }).catch((error) => {
+    console.error("Redirect Result Error:", error);
+  });
 } catch (err) {
   console.error("Firebase Live init error:", err);
 }
 
-// -------------------------------------------------------------------------
-// AUTHENTICATION API
-// -------------------------------------------------------------------------
+// ---------------------------------------------------------
+// AUTHENTICATION API (모바일 스마트폰 지원 강화)
+// ---------------------------------------------------------
 
-// 1) 구글 로그인
+// 1) 구글 로그인 (PC는 팝업, 모바일은 리디렉션 자동 감지)
 export async function loginWithGoogle() {
   if (!auth) return null;
   const provider = new GoogleAuthProvider();
-  try {
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-    console.log("Google Login Success:", user.displayName);
-    return user;
-  } catch (error) {
-    console.error("Google Login Error:", error);
-    alert("구글 로그인 실패: " + error.message);
-    throw error;
+  provider.setCustomParameters({ prompt: 'select_account' });
+
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  if (isMobile) {
+    // 모바일 브라우저인 경우 팝업 차단 방지용 리디렉션 로그인 실행
+    try {
+      await signInWithRedirect(auth, provider);
+      return null;
+    } catch (e) {
+      console.error("Mobile Redirect Login Error:", e);
+      throw e;
+    }
+  } else {
+    // PC 브라우저인 경우 팝업 로그인 실행
+    try {
+      const result = await signInWithPopup(auth, provider);
+      return result.user;
+    } catch (error) {
+      // 만약 PC에서도 팝업이 차단된 경우 리디렉션으로 자동 재시도
+      if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
+        console.warn("Popup blocked, trying redirect fallback...");
+        await signInWithRedirect(auth, provider);
+        return null;
+      }
+      throw error;
+    }
   }
 }
 
@@ -74,7 +100,6 @@ export async function loginAnonymously() {
     return result.user;
   } catch (error) {
     console.error("Anonymous Login Error:", error);
-    alert("익명 로그인 실패: " + error.message);
     throw error;
   }
 }
@@ -95,29 +120,25 @@ export function subscribeAuthChange(callback) {
   });
 }
 
-// -------------------------------------------------------------------------
-// FIRESTORE DATABASE API (유저 데이터 및 실시간 랭킹)
-// -------------------------------------------------------------------------
-
-// 유저 데이터 Firestore에 동기화
+// ---------------------------------------------------------
+// FIRESTORE DATABASE API
+// ---------------------------------------------------------
 export async function syncUserDataToFirestore(uid, userData) {
   if (!db) return;
   try {
     const userRef = doc(db, "users", uid);
     await setDoc(userRef, {
-      nickname: userData.nickname || '플레이어',
+      nickname: userData.nickname || '영웅',
       gold: userData.gold || 0,
       clearCount: userData.clearCount || 0,
       bestBossTime: userData.bestBossTime || null,
       updatedAt: new Date().toISOString()
     }, { merge: true });
-    console.log("Firestore User Data Synced:", uid);
   } catch (e) {
     console.error("Firestore sync error:", e);
   }
 }
 
-// Firestore에서 유저 데이터 로드
 export async function fetchUserDataFromFirestore(uid) {
   if (!db) return null;
   try {
@@ -132,7 +153,6 @@ export async function fetchUserDataFromFirestore(uid) {
   return null;
 }
 
-// 전 세계 실시간 명예의 전당 Top 10 랭킹 조회
 export async function fetchTopRankingsFromFirestore(tabName) {
   if (!db) return null;
   try {
@@ -153,7 +173,7 @@ export async function fetchTopRankingsFromFirestore(tabName) {
       const data = docSnap.data();
       if (tabName === 'time' && !data.bestBossTime) return;
       results.push({
-        nickname: data.nickname || '익명',
+        nickname: data.nickname || '익명영웅',
         value: tabName === 'time' ? data.bestBossTime : (tabName === 'gold' ? data.gold : data.clearCount)
       });
     });

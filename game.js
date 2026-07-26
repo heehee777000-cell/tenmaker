@@ -140,7 +140,7 @@ const TenGame = (() => {
     if (modal) modal.classList.remove('active');
   }
 
-  // 구글 로그인 처리 (상세 에러 피드백 추가)
+  // 구글 로그인 처리 (모바일 리디렉션 & PC 팝업 분기 지원)
   async function handleGoogleLogin() {
     if (!firebaseModule) await initFirebaseModule();
     if (firebaseModule && firebaseModule.loginWithGoogle) {
@@ -154,14 +154,12 @@ const TenGame = (() => {
         console.error("Google Login Catch Error:", e);
         if (e.code === 'auth/unauthorized-domain') {
           alert(`⚠️ 구글 로그인 승인 도메인 오류!\n\n파이어베이스 콘솔의 Authorized Domains에 현재 접속 주소를 추가해주셔야 합니다.`);
-        } else if (e.code === 'auth/popup-blocked') {
-          alert(`⚠️ 브라우저 팝업이 차단되었습니다! 팝업 차단을 해제하고 다시 시도해주세요.`);
         } else if (e.code !== 'auth/popup-closed-by-user') {
-          alert(`구글 로그인 시도 중 알 수 없는 오류가 발생했습니다: ${e.message || e}`);
+          alert(`구글 로그인 시도 중 모바일 에러: ${e.message || e}`);
         }
       }
     } else {
-      alert("파이어베이스 모듈이 아직 로드되지 않았습니다. 잠시 후 다시 시도해보세요.");
+      alert("파이어베이스 모듈이 로드 중입니다. 잠시 후 다시 시도해보세요.");
     }
   }
 
