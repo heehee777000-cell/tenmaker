@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TenMaker - 10의 연금술사 (10 만들기 미니게임 & 보스 레이드)</title>
+  <meta name="description" content="10을 만드는 3가지 흥미진진한 미니게임과 모은 골드로 도전하는 보스 레이드! 구글/익명 로그인으로 명예의 전당 랭킹에 도전하세요.">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app" class="app-container">
+
+    <!-- TOP HEADER / PLAYER STATS BAR -->
+    <header class="top-bar">
+      <div class="logo-area">
+        <i class="fa-solid fa-gem glow-icon"></i>
+        <h1 class="logo-title">TEN<span class="highlight">MAKER</span></h1>
+      </div>
+      <div class="user-stats">
+        <!-- AUTH & PROFILE PILL -->
+        <div class="stat-pill profile-pill" id="profileBtn" onclick="TenGame.openAuthModal()">
+          <i id="userAuthIcon" class="fa-solid fa-user-astronaut"></i>
+          <span id="playerNickname">로그인</span>
+        </div>
+        <div class="stat-pill gold-pill">
+          <i class="fa-solid fa-coins gold-icon"></i>
+          <span id="userGold">0</span> G
+        </div>
+        <div class="stat-pill clear-pill">
+          <i class="fa-solid fa-trophy clear-icon"></i>
+          <span id="userClearCount">0</span>회
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN MENU CONTAINER -->
+    <main id="mainMenu" class="screen active">
+      <div class="hero-banner">
+        <div class="hero-badge">10의 보수를 익히는 수학 어드벤처</div>
+        <h2>10을 완성하고 <span class="text-gradient">보스에 도전하라!</span></h2>
+        <p>3가지 미니게임으로 골드를 모으고 10문제 연속 타임어택 보스전으로 명예의 전당에 이름을 올리세요.</p>
+      </div>
+
+      <!-- GAME SELECT GRID -->
+      <section class="game-select-section">
+        <h3 class="section-title"><i class="fa-solid fa-gamepad"></i> 연습 미니게임 (제한시간 25초)</h3>
+        <div class="card-grid">
+          
+          <!-- MINI GAME 1 -->
+          <div class="game-card connect-card" onclick="TenGame.openInstruction('connect')">
+            <div class="card-badge">게임 1</div>
+            <div class="card-icon">🔗</div>
+            <h4>10 짝짓기</h4>
+            <p>화면의 타일 중 <strong>합이 10이 되는 두 숫자</strong>를 짝지어 연결하여 파괴하세요!</p>
+            <div class="card-footer">
+              <span><i class="fa-solid fa-clock"></i> 25초</span>
+              <button class="btn-play">플레이 <i class="fa-solid fa-play"></i></button>
+            </div>
+          </div>
+
+          <!-- MINI GAME 2 -->
+          <div class="game-card block-card" onclick="TenGame.openInstruction('block')">
+            <div class="card-badge">게임 2</div>
+            <div class="card-icon">🧱</div>
+            <h4>10 블럭 크러시</h4>
+            <p>격자판에서 <strong>인접한 두 블럭의 합이 10</strong>이 되면 터뜨리세요! 연속 낙하 콤보!</p>
+            <div class="card-footer">
+              <span><i class="fa-solid fa-clock"></i> 25초</span>
+              <button class="btn-play">플레이 <i class="fa-solid fa-play"></i></button>
+            </div>
+          </div>
+
+          <!-- MINI GAME 3 -->
+          <div class="game-card math-rush-card" onclick="TenGame.openInstruction('math')">
+            <div class="card-badge">게임 3</div>
+            <div class="card-icon">⚡</div>
+            <h4>10 수식 스피드 러시</h4>
+            <p><code>? + 4 = 10</code>, <code>10 - ? = 3</code> 수식의 빈칸 정답을 빛의 속도로 선택하세요!</p>
+            <div class="card-footer">
+              <span><i class="fa-solid fa-clock"></i> 25초</span>
+              <button class="btn-play">플레이 <i class="fa-solid fa-play"></i></button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- BOSS & HALL OF FAME ROW -->
+      <section class="main-action-row">
+
+        <!-- BOSS CHALLENGE CARD -->
+        <div class="boss-banner-card">
+          <div class="boss-visual">
+            <span class="boss-emoji">👹</span>
+          </div>
+          <div class="boss-info">
+            <div class="boss-tag">FINAL STAGE</div>
+            <h3>10의 마왕 보스 레이드</h3>
+            <p>10을 만드는 핵심 문제 10개 연속 출제! 최단 시간 타임어택 도전!</p>
+            <div class="boss-req">
+              <span>입장료: <strong>100 Gold</strong></span>
+              <span id="bestTimeDisplay" class="best-time">내 최단 기록: -</span>
+            </div>
+          </div>
+          <button id="bossStartBtn" class="btn-boss" onclick="TenGame.openInstruction('boss')">
+            보스 도전하기 <i class="fa-solid fa-skull"></i>
+          </button>
+        </div>
+
+        <!-- HALL OF FAME QUICK BTN CARD -->
+        <div class="hall-card" onclick="TenGame.openHallOfFame()">
+          <div class="hall-icon"><i class="fa-solid fa-trophy"></i></div>
+          <div class="hall-info">
+            <h3>명예의 전당</h3>
+            <p>보스전 최단시간, 골드왕, 클리어왕 TOP 10 랭킹을 확인하세요!</p>
+          </div>
+          <button class="btn-hall">랭킹 보기 <i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+
+      </section>
+    </main>
+
+    <!-- MINI GAME SCREEN -->
+    <div id="gameScreen" class="screen overlay-screen">
+      <div class="game-header">
+        <button class="btn-close" onclick="TenGame.quitCurrentGame()"><i class="fa-solid fa-xmark"></i> 나가기</button>
+        <h3 id="gameTitle">미니게임 타이틀</h3>
+        <div class="timer-box">
+          <i class="fa-solid fa-stopwatch"></i>
+          <span id="gameTimer">25</span>s
+        </div>
+      </div>
+      <div class="timer-bar-wrapper">
+        <div id="timerBar" class="timer-bar"></div>
+      </div>
+
+      <div class="game-score-bar">
+        <div>점수: <span id="gameScore">0</span></div>
+        <div>획득 예상 골드: <span id="gameEarnedGold">0</span> G</div>
+      </div>
+
+      <!-- PLAY AREA -->
+      <div id="playArea" class="play-area">
+        <!-- Dynamic Game Content Rendered Here -->
+      </div>
+    </div>
+
+    <!-- BOSS RAID SCREEN -->
+    <div id="bossScreen" class="screen overlay-screen">
+      <div class="boss-stage-header">
+        <button class="btn-close" onclick="TenGame.quitCurrentGame()"><i class="fa-solid fa-xmark"></i> 포기하기</button>
+        <div class="boss-timer">
+          <i class="fa-solid fa-stopwatch-20"></i> 소요시간: <span id="bossTimer">0.00</span>초
+        </div>
+      </div>
+
+      <!-- BOSS CHARACTER AREA -->
+      <div class="boss-character-wrapper">
+        <div class="boss-avatar-box">
+          <div id="bossAvatar" class="boss-avatar">👹</div>
+          <div id="bossDamageFloat" class="damage-float"></div>
+        </div>
+        <div class="boss-hp-container">
+          <div class="boss-name">10의 마왕 - 텐더로드 (TEN-LORD)</div>
+          <div class="hp-bar-bg">
+            <div id="bossHpBar" class="hp-bar-fill" style="width: 100%;"></div>
+          </div>
+          <div class="hp-text">남은 문제: <span id="bossHpText">10</span> / 10</div>
+        </div>
+      </div>
+
+      <!-- BOSS QUIZ CONTAINER -->
+      <div class="boss-quiz-card">
+        <div class="quiz-step-badge">문제 <span id="bossQuizStep">1</span> / 10</div>
+        <div id="bossQuizQuestion" class="boss-quiz-question">? + 4 = 10</div>
+        <div id="bossQuizOptions" class="boss-quiz-options">
+          <!-- Answer Options rendered dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- INSTRUCTION MODAL -->
+    <div id="instructionModal" class="modal-backdrop">
+      <div class="modal-card instruction-modal-card">
+        <div id="instructIcon" class="instruct-icon">🎮</div>
+        <h3 id="instructTitle">게임 설명</h3>
+        <div class="instruct-body">
+          <p id="instructDesc">게임 방법 안내입니다.</p>
+          <div id="instructRules" class="instruct-rules">
+            <!-- Dynamic Rules -->
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="TenGame.closeInstruction()">돌아가기</button>
+          <button id="instructStartBtn" class="btn-primary">게임 시작! <i class="fa-solid fa-play"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUTHENTICATION MODAL (FIREBASE AUTH) -->
+    <div id="authModal" class="modal-backdrop">
+      <div class="modal-card auth-modal-card">
+        <div class="modal-header">
+          <h3><i class="fa-solid fa-shield-halved"></i> 계정 로그인</h3>
+          <button class="btn-close-icon" onclick="TenGame.closeAuthModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <p class="auth-desc">파이어베이스 로그인으로 데이터를 동기화하고 명예의 전당 랭킹에 등록해보세요!</p>
+
+        <div id="authOptions" class="auth-options">
+          <button class="btn-auth btn-google" onclick="TenGame.handleGoogleLogin()">
+            <i class="fa-brands fa-google"></i> 구글 계정으로 로그인
+          </button>
+          <button class="btn-auth btn-anon" onclick="TenGame.handleAnonLogin()">
+            <i class="fa-solid fa-user-secret"></i> 익명 계정으로 즉시 플레이
+          </button>
+        </div>
+
+        <div id="authProfileView" class="auth-profile-view" style="display: none;">
+          <div class="profile-info-box">
+            <div class="profile-name" id="loggedInName">사용자</div>
+            <div class="profile-type" id="loggedInType">구글 계정</div>
+          </div>
+          <div class="nickname-edit-box">
+            <label>닉네임 수정</label>
+            <input type="text" id="nicknameInput" maxlength="10" placeholder="닉네임 입력 (최대 10자)" />
+            <button class="btn-primary" onclick="TenGame.saveProfileNickname()">닉네임 변경</button>
+          </div>
+          <button class="btn-secondary btn-logout" onclick="TenGame.handleLogout()">
+            <i class="fa-solid fa-right-from-bracket"></i> 로그아웃
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULT MODAL -->
+    <div id="resultModal" class="modal-backdrop">
+      <div class="modal-card">
+        <div id="resultIcon" class="result-icon">🎉</div>
+        <h3 id="resultTitle">게임 완료!</h3>
+        <p id="resultDesc">수고하셨습니다!</p>
+        <div class="result-stats" id="resultStats">
+          <!-- Result Stats -->
+        </div>
+        <div class="modal-actions">
+          <button class="btn-primary" onclick="TenGame.closeResultModal()">확인 및 메인으로</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HALL OF FAME MODAL -->
+    <div id="hallModal" class="modal-backdrop">
+      <div class="modal-card hall-modal-card">
+        <div class="modal-header">
+          <h3><i class="fa-solid fa-trophy gold-icon"></i> 명예의 전당 (TOP 10)</h3>
+          <button class="btn-close-icon" onclick="TenGame.closeHallOfFame()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <!-- TAB BUTTONS -->
+        <div class="hall-tabs">
+          <button class="tab-btn active" onclick="TenGame.switchHallTab('time')">⏱️ 보스전 스피드런</button>
+          <button class="tab-btn" onclick="TenGame.switchHallTab('gold')">💰 골드 부자</button>
+          <button class="tab-btn" onclick="TenGame.switchHallTab('clear')">🎖️ 미니게임 클리어</button>
+        </div>
+
+        <!-- RANKING LIST TABLE CONTAINER -->
+        <div class="ranking-table-container">
+          <table class="ranking-table">
+            <thead>
+              <tr id="rankingHeader">
+                <th>순위</th>
+                <th>유저 닉네임</th>
+                <th>기록</th>
+              </tr>
+            </thead>
+            <tbody id="rankingListBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module" src="firebase-config.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

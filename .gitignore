@@ -1,0 +1,16 @@
+# Dependencies & Node
+node_modules/
+npm-debug.log*
+
+# Environment / Secret Keys
+.env
+.env.local
+.env.production
+
+# IDE & OS files
+.DS_Store
+.vscode/
+.idea/
+
+# Vercel
+.vercel
