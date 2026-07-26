@@ -7,7 +7,7 @@ const TenGame = (() => {
   let state = {
     user: null, // Firebase Auth user object
     uid: 'local_player',
-    nickname: '10연금술사',
+    nickname: '로그인', // ★ [요구사항 반영] 기본 표기를 '로그인'으로 변경
     gold: 150, // 초기 체험 골드
     clearCount: 0,
     bestBossTime: null, // 최단 시간 (초 단위)
@@ -29,7 +29,7 @@ const TenGame = (() => {
           if (firebaseUser) {
             state.user = firebaseUser;
             state.uid = firebaseUser.uid;
-            state.nickname = firebaseUser.displayName || state.nickname;
+            state.nickname = firebaseUser.displayName || (state.nickname === '로그인' ? '10연금술사' : state.nickname);
             
             const dbData = await firebaseModule.fetchUserDataFromFirestore(firebaseUser.uid);
             if (dbData) {
@@ -43,6 +43,7 @@ const TenGame = (() => {
           } else {
             state.user = null;
             state.uid = 'local_player';
+            state.nickname = '로그인';
           }
           updateHeaderUI();
         });
@@ -99,7 +100,7 @@ const TenGame = (() => {
     if (savedUser) {
       try {
         const parsed = JSON.parse(savedUser);
-        state.nickname = parsed.nickname || state.nickname;
+        state.nickname = parsed.nickname || '로그인';
         state.gold = parsed.gold ?? state.gold;
         state.clearCount = parsed.clearCount ?? state.clearCount;
         state.bestBossTime = parsed.bestBossTime ?? null;
@@ -148,7 +149,7 @@ const TenGame = (() => {
       pName.innerText = state.nickname;
       authIcon.className = state.user.isAnonymous ? 'fa-solid fa-user-secret' : 'fa-brands fa-google';
     } else {
-      pName.innerText = state.nickname;
+      pName.innerText = '로그인'; // ★ 로그인 전 기본 표기 '로그인'
       authIcon.className = 'fa-solid fa-user-astronaut';
     }
 
@@ -214,6 +215,7 @@ const TenGame = (() => {
     if (firebaseModule && firebaseModule.logoutUser) {
       await firebaseModule.logoutUser();
       state.user = null;
+      state.nickname = '로그인';
       closeAuthModal();
       alert("로그아웃 되었습니다.");
       updateHeaderUI();
@@ -956,5 +958,4 @@ const TenGame = (() => {
   return api;
 })();
 
-// ★ [핵심] window.TenGame 에 명시적으로 바인딩하여 HTML 인라인 onclick 이벤트에서 100% 호출 가능하게 처리 ★
 window.TenGame = TenGame;
