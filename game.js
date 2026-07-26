@@ -20,7 +20,7 @@ const TenGame = (() => {
   let timerInterval = null;
   let firebaseModule = null;
 
-  // 동적 파이어베이스 모듈 임포트
+  // 동적 파이어베이스 모듈 임포트 및 바인딩
   async function initFirebaseModule() {
     try {
       firebaseModule = await import('./firebase-config.js');
@@ -31,7 +31,6 @@ const TenGame = (() => {
             state.uid = firebaseUser.uid;
             state.nickname = firebaseUser.displayName || state.nickname;
             
-            // Firestore에서 유저 데이터 동기화
             const dbData = await firebaseModule.fetchUserDataFromFirestore(firebaseUser.uid);
             if (dbData) {
               state.gold = dbData.gold ?? state.gold;
@@ -39,7 +38,6 @@ const TenGame = (() => {
               state.bestBossTime = dbData.bestBossTime ?? state.bestBossTime;
               state.nickname = dbData.nickname || state.nickname;
             } else {
-              // 최초 가입 시 Firestore 문서 생성
               await firebaseModule.syncUserDataToFirestore(firebaseUser.uid, state);
             }
           } else {
@@ -96,7 +94,6 @@ const TenGame = (() => {
     ]
   };
 
-  // LocalStorage 로드/저장
   function loadData() {
     const savedUser = localStorage.getItem('tenmaker_user');
     if (savedUser) {
@@ -125,7 +122,6 @@ const TenGame = (() => {
       bestBossTime: state.bestBossTime
     }));
 
-    // Firestore 온라인 동기화
     if (firebaseModule && state.user) {
       firebaseModule.syncUserDataToFirestore(state.user.uid, state);
     }
@@ -165,6 +161,8 @@ const TenGame = (() => {
 
   function openAuthModal() {
     const modal = document.getElementById('authModal');
+    if (!modal) return;
+
     const optBox = document.getElementById('authOptions');
     const profileBox = document.getElementById('authProfileView');
 
@@ -182,7 +180,8 @@ const TenGame = (() => {
   }
 
   function closeAuthModal() {
-    document.getElementById('authModal').classList.remove('active');
+    const modal = document.getElementById('authModal');
+    if (modal) modal.classList.remove('active');
   }
 
   async function handleGoogleLogin() {
@@ -299,7 +298,8 @@ const TenGame = (() => {
   }
 
   function closeInstruction() {
-    document.getElementById('instructionModal').classList.remove('active');
+    const modal = document.getElementById('instructionModal');
+    if (modal) modal.classList.remove('active');
   }
 
   // ----------------------------------------------------
@@ -825,7 +825,7 @@ const TenGame = (() => {
   }
 
   // ----------------------------------------------------
-  // HALL OF FAME RANKING LOGIC (FIRESTORE REAL-TIME SUPPORT)
+  // HALL OF FAME RANKING LOGIC
   // ----------------------------------------------------
   function updateUserRankings() {
     let rankings = getRankings();
@@ -875,7 +875,6 @@ const TenGame = (() => {
   async function renderHallTable(tabName) {
     let list = [];
 
-    // Firestore 실시간 전 세계 랭킹 조회가 가능하면 우선 적용
     if (firebaseModule && firebaseModule.fetchTopRankingsFromFirestore) {
       const dbList = await firebaseModule.fetchTopRankingsFromFirestore(tabName);
       if (dbList && dbList.length > 0) {
@@ -936,7 +935,7 @@ const TenGame = (() => {
     initFirebaseModule();
   });
 
-  return {
+  const api = {
     openInstruction,
     closeInstruction,
     startMiniGame,
@@ -953,4 +952,9 @@ const TenGame = (() => {
     handleLogout,
     saveProfileNickname
   };
+
+  return api;
 })();
+
+// ★ [핵심] window.TenGame 에 명시적으로 바인딩하여 HTML 인라인 onclick 이벤트에서 100% 호출 가능하게 처리 ★
+window.TenGame = TenGame;
