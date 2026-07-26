@@ -140,6 +140,7 @@ const TenGame = (() => {
     if (modal) modal.classList.remove('active');
   }
 
+  // 구글 로그인 처리 (상세 에러 피드백 추가)
   async function handleGoogleLogin() {
     if (!firebaseModule) await initFirebaseModule();
     if (firebaseModule && firebaseModule.loginWithGoogle) {
@@ -147,9 +148,20 @@ const TenGame = (() => {
         const user = await firebaseModule.loginWithGoogle();
         if (user) {
           closeAuthModal();
-          alert(`🎉 전설의 영웅으로 로그인되었습니다, ${user.displayName || '영웅'}님!`);
+          alert(`🎉 환영합니다, ${user.displayName || '영웅'}님!`);
         }
-      } catch (e) { console.error(e); }
+      } catch (e) {
+        console.error("Google Login Catch Error:", e);
+        if (e.code === 'auth/unauthorized-domain') {
+          alert(`⚠️ 구글 로그인 승인 도메인 오류!\n\n파이어베이스 콘솔의 Authorized Domains에 현재 접속 주소를 추가해주셔야 합니다.`);
+        } else if (e.code === 'auth/popup-blocked') {
+          alert(`⚠️ 브라우저 팝업이 차단되었습니다! 팝업 차단을 해제하고 다시 시도해주세요.`);
+        } else if (e.code !== 'auth/popup-closed-by-user') {
+          alert(`구글 로그인 시도 중 알 수 없는 오류가 발생했습니다: ${e.message || e}`);
+        }
+      }
+    } else {
+      alert("파이어베이스 모듈이 아직 로드되지 않았습니다. 잠시 후 다시 시도해보세요.");
     }
   }
 
@@ -162,7 +174,10 @@ const TenGame = (() => {
           closeAuthModal();
           alert("👤 익명 영웅으로 전장에 참여하셨습니다!");
         }
-      } catch (e) { console.error(e); }
+      } catch (e) {
+        console.error("Anon Login Error:", e);
+        alert("익명 로그인 시도 실패: " + (e.message || e));
+      }
     }
   }
 
